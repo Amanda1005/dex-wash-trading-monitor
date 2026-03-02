@@ -1,0 +1,32 @@
+name: Wash Trading Monitor
+
+on:
+  schedule:
+    - cron: "0 9 * * *"   # Every day at 09:00 UTC (17:00 Taipei)
+  workflow_dispatch:       # Allow manual trigger from GitHub UI
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run monitor
+        env:
+          DUNE_API_KEY:   ${{ secrets.DUNE_API_KEY }}
+          DUNE_QUERY_ID:  ${{ secrets.DUNE_QUERY_ID }}
+          THRESHOLD:      "7.0"
+          SMTP_USER:      ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD:  ${{ secrets.SMTP_PASSWORD }}
+          ALERT_TO:       ${{ secrets.ALERT_TO }}
+        run: python monitor.py
